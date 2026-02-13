@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: quiz-agent-api
+    env: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: MEM0_BASE_URL
+        value: https://api.mem0.ai
+      - key: MEM0_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENROUTER_BASE_URL
+        value: https://openrouter.ai/api/v1
+      - key: OPENROUTER_MODEL
+        value: openai/gpt-4o-mini
+      - key: AGENT_SECRET
+        generateValue: true
+      - key: CHROMA_HOST
+        value: chroma
+      - key: CHROMA_PORT
+        value: "8000"
+      - key: CHROMA_COLLECTION
+        value: quizzes
+
+  - type: web
+    name: chroma
+    env: docker
+    plan: starter
+    dockerfilePath: ./chroma.Dockerfile
+    disk:
+      name: chroma-data
+      mountPath: /chroma-data
+      sizeGB: 10
+    envVars:
+      - key: IS_PERSISTENT
+        value: "true"
+      - key: PERSIST_DIRECTORY
+        value: /chroma-data
+      - key: PORT
+        value: "8000"
